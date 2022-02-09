@@ -26,8 +26,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-          coverage: xdebug
-          extensions: xdebug, tokenizer
+          coverage: none
+          extensions: tokenizer
           tools: composer:v2
 
       - name: Nette code checker
@@ -53,5 +53,5 @@ jobs:
       - name: Code coverage
         if: ${{ '8.0' == matrix.php-versions }}
         run: |
-          vendor/bin/tester -C tests -s --coverage ./coverage.xml --coverage-src ./src
+          vendor/bin/tester -p phpdbg -C tests -s --coverage ./coverage.xml --coverage-src ./src
           vendor/bin/ocular code-coverage:upload --format=php-clover coverage.xml
