@@ -5,70 +5,61 @@ declare(strict_types=1);
 namespace SixtyEightPublishers\Asset\DI;
 
 use Nette;
-use Symfony;
+use Nette\DI\Definitions\Statement;
+use Symfony\Component\Asset\UrlPackage;
+use Symfony\Component\Asset\PathPackage;
+use Symfony\Component\Asset\PackageInterface;
 
 final class PackageDefinitionFacade
 {
 	use Nette\SmartObject;
 
-	/** @var \SixtyEightPublishers\Asset\DI\ReferenceFacade  */
-	private $referenceFacade;
+	private ReferenceFacade $referenceFacade;
 
-	/**
-	 * @param \SixtyEightPublishers\Asset\DI\ReferenceFacade $referenceFacade
-	 */
 	public function __construct(ReferenceFacade $referenceFacade)
 	{
 		$this->referenceFacade = $referenceFacade;
 	}
 
-	/**
-	 * @param string              $name
-	 * @param string|NULL         $basePath
-	 * @param array               $baseUrls
-	 * @param \Nette\DI\Statement $versionStrategy
-	 *
-	 * @return \Nette\DI\Statement
-	 */
-	public function createPackageStatement(string $name, ?string $basePath, array $baseUrls, Nette\DI\Statement $versionStrategy): Nette\DI\Statement
-	{
+	public function createPackageStatement(
+		string $name,
+		?string $basePath,
+		array $baseUrls,
+		Statement $versionStrategy
+	): Statement {
 		if (!empty($basePath) && !empty($baseUrls)) {
 			throw new \LogicException('An asset package cannot have base URLs and base paths.');
 		}
 
 		if (empty($baseUrls)) {
-			$reference = $this->getPackageDependencyReference(
-				new Nette\DI\Statement(Symfony\Component\Asset\PathPackage::class, [
-					'basePath' => (string) $basePath,
-					'versionStrategy' => $versionStrategy,
-				]),
-				$name
+			return new Statement(
+				$this->getPackageDependencyReference(
+					new Statement(PathPackage::class, [
+						'basePath' => (string)$basePath,
+						'versionStrategy' => $versionStrategy,
+					]),
+					$name
+				)
 			);
-		} else {
-			$reference = $this->getPackageDependencyReference(
-				new Nette\DI\Statement(Symfony\Component\Asset\UrlPackage::class, [
+		}
+
+		return new Statement(
+			$this->getPackageDependencyReference(
+				new Statement(UrlPackage::class, [
 					'baseUrls' => $baseUrls,
 					'versionStrategy' => $versionStrategy,
 				]),
 				$name
-			);
-		}
-
-		return new Nette\DI\Statement($reference);
+			)
+		);
 	}
 
-	/**
-	 * @param string|\Nette\DI\Statement $definition
-	 * @param string                     $packageName
-	 *
-	 * @return string
-	 */
-	public function getPackageDependencyReference($definition, string $packageName): string
+	public function getPackageDependencyReference(string|Statement $definition, string $packageName): string
 	{
 		return $this->referenceFacade->getDependencyReference(
 			$definition,
 			'package.' . $packageName,
-			Symfony\Component\Asset\PackageInterface::class
+			PackageInterface::class
 		);
 	}
 }

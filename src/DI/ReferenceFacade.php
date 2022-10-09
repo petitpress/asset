@@ -5,44 +5,35 @@ declare(strict_types=1);
 namespace SixtyEightPublishers\Asset\DI;
 
 use Nette;
+use Nette\Utils\Strings;
+use Nette\DI\CompilerExtension;
+use Nette\DI\Definitions\Statement;
+use Nette\DI\Extensions\InjectExtension;
 
 final class ReferenceFacade
 {
 	use Nette\SmartObject;
 
-	/** @var \Nette\DI\CompilerExtension  */
-	private $extension;
+	private CompilerExtension $extension;
 
-	/**
-	 * @param \Nette\DI\CompilerExtension $extension
-	 */
-	public function __construct(Nette\DI\CompilerExtension $extension)
+	public function __construct(CompilerExtension $extension)
 	{
 		$this->extension = $extension;
 	}
 
-	/**
-	 * @param string|\Nette\DI\Statement $definition
-	 * @param string                     $registrationName
-	 * @param string                     $type
-	 *
-	 * @return string
-	 */
-	public function getDependencyReference($definition, string $registrationName, string $type): string
+	public function getDependencyReference(string|Statement $definition, string $registrationName, string $type): string
 	{
-		if (!is_string($definition) || !Nette\Utils\Strings::startsWith($definition, '@')) {
+		if (!is_string($definition) || !Strings::startsWith($definition, '@')) {
 			$this->extension
 				->getContainerBuilder()
 				->addDefinition($registrationName = $this->extension->prefix($registrationName))
 				->setType($type)
 				->setFactory($definition)
-				->addTag(Nette\DI\Extensions\InjectExtension::TAG_INJECT);
+				->addTag(InjectExtension::TAG_INJECT);
 
-			$registrationName = '@' . $registrationName;
-		} else {
-			$registrationName = $definition;
+			return '@' . $registrationName;
 		}
 
-		return $registrationName;
+		return $definition;
 	}
 }
