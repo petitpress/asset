@@ -34,10 +34,6 @@ class AssetLatteExtension extends Extension
 			$args = [$tag->parser->parseExpression()];
 		}
 
-		if (!$assetPath instanceof StringNode) {
-			throw new \RuntimeException('Missing asset path.');
-		}
-
 		return new AuxiliaryNode(
 			fn (PrintContext $context) => $context->format(
 				'echo %escape($this->global->symfonyPackages->getUrl(%node, %args));',
@@ -55,10 +51,6 @@ class AssetLatteExtension extends Extension
 		if (!$tag->parser->isEnd()) {
 			$tag->parser->stream->tryConsume(',');
 			$args = [$tag->parser->parseExpression()];
-		}
-
-		if (!$assetPath instanceof StringNode) {
-			throw new \RuntimeException('Missing asset path.');
 		}
 
 		return new AuxiliaryNode(

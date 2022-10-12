@@ -34,8 +34,15 @@ final class AssetLatteExtensionTest extends Tester\TestCase
 
 		Tester\Assert::same(
 			'http://cdn.example.com/my/first/file.png?version=SomeVersionScheme',
-			$latte->renderToString('{asset "my/first/file.png"}')
+			$latte->renderToString("{asset 'my/first/file.png'}")
 		);
+
+		$namePng = 'file';
+		Tester\Assert::same(
+			'http://cdn.example.com/my/first/file.png?version=SomeVersionScheme',
+			$latte->renderToString("{asset 'my/first/' . $namePng . '.png'}")
+		);
+
 		Tester\Assert::same(
 			'/my/second/file.abc123.png',
 			$latte->renderToString('{asset "my/second/file.png", "json_manifest_strategy"}')
